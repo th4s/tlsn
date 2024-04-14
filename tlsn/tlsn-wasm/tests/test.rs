@@ -10,22 +10,19 @@ use tlsn_wasm::{prover::JsProver, setup_tracing_web, verifier::JsVerifier};
 
 use wasm_bindgen_rayon::init_thread_pool;
 
-wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_dedicated_worker);
 
 #[wasm_bindgen_test]
 async fn test() -> Result<(), JsValue> {
     setup_tracing_web();
-
-    console::log_1(&"Hello, console log!".into());
-
-    tracing::info!("Hello, world!");
-
-    //spawn_local(JsFuture::from(init_thread_pool(8)).map(|_| ()));
+    // spawn_local(JsFuture::from(init_thread_pool(4)).map(|_| ()));
+    // JsFuture::from(init_thread_pool(8)).map(|_| ()).await;
+    
+    let _ = init_thread_pool(4);  // Specify the number of threads you want
 
     let se = Serializer::new().serialize_maps_as_objects(true);
-
     let prover_config: JsValue = serde_json::json!({
-        "id": "test",
+        "id": "interactive-verifier-demo",
         "server_dns": "swapi.dev",
         "max_sent_data": 1024,
         "max_received_data": 1024,
@@ -33,16 +30,7 @@ async fn test() -> Result<(), JsValue> {
     .serialize(&se)
     .unwrap();
 
-    let verifier_config: JsValue = serde_json::json!({
-        "id": "test",
-        "max_sent_data": 1024,
-        "max_received_data": 1024,
-    })
-    .serialize(&se)
-    .unwrap();
-
     let mut prover = JsProver::new(prover_config)?;
-    let mut verifier = JsVerifier::new(verifier_config)?;
 
     let request: JsValue = serde_json::json!({
         "method": "GET",
@@ -61,24 +49,13 @@ async fn test() -> Result<(), JsValue> {
     .serialize(&se)
     .unwrap();
 
-    verifier
-        .connect("ws://0.tcp.ngrok.io:14339?clientId=bob")
+    prover
+        .setup("ws://localhost:9816/verify")
         .await?;
+    prover
+        .send_request("wss://notary.pse.dev/proxy?token=swapi.dev", request)
+        .await?;
+    prover.reveal(redact).await?;
 
-    futures::try_join!(
-        async move {
-            prover
-                .setup("ws://0.tcp.ngrok.io:14339?clientId=alice")
-                .await?;
-            prover
-                .send_request("wss://notary.pse.dev/proxy?token=swapi.dev", request)
-                .await?;
-            prover.reveal(redact).await?;
-
-            Ok(())
-        },
-        verifier.verify(),
-    )?;
-
-    Ok(())
+     Ok(())
 }
