@@ -58,7 +58,6 @@ impl JsVerifier {
         let (_, prover_conn) = WsMeta::connect(prover_url, None).await?;
 
         info!("Connected to prover");
-        web_sys::console::log_1(&"Connected to prover".into());
 
         self.state = State::Connected((verifier, prover_conn));
 

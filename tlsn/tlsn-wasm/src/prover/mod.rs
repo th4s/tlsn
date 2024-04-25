@@ -1,6 +1,8 @@
 mod config;
+mod data;
 
-pub use config::{Body, HttpRequest, HttpResponse, Method, ProverConfig, Redact};
+pub use config::{Body, HttpRequest, HttpResponse, Method, ProverConfig, Redact, RevealConfig};
+pub use data::NotarizedSession;
 
 use enum_try_as_inner::EnumTryAsInner;
 use futures::TryFutureExt;
@@ -134,6 +136,29 @@ impl JsProver {
         self.state = State::Complete;
 
         Ok(())
+    }
+
+    /// Completes the notarization process.
+    #[wasm_bindgen]
+    pub async fn notarize(&mut self) -> Result<NotarizedSession> {
+        let mut prover = self
+            .state
+            .take()
+            .try_into_closed()?
+            .to_http()?
+            .start_notarize();
+
+        info!("Committing to data");
+
+        prover.commit()?;
+
+        info!("Finalizing notarization");
+
+        let notarized_session = prover.finalize().await?;
+
+        info!("Notarization complete");
+
+        Ok(NotarizedSession::new(notarized_session))
     }
 }
 

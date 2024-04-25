@@ -19,6 +19,11 @@ impl NotarizedHttpSession {
         }
     }
 
+    /// Returns the parts of the notarized HTTP session.
+    pub fn into_parts(self) -> (NotarizedSession, HttpTranscript) {
+        (self.session, self.transcript)
+    }
+
     /// Returns the notarized TLS session.
     pub fn session(&self) -> &NotarizedSession {
         &self.session

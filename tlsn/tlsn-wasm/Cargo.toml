@@ -19,6 +19,7 @@ wasm-opt = true
 
 [dependencies]
 tlsn-core.workspace = true
+tlsn-formats.workspace = true
 tlsn-utils-aio.workspace = true
 tlsn-prover = { workspace = true, features = ["tracing"] }
 tlsn-tls-client-async.workspace = true
@@ -85,3 +86,7 @@ console_error_panic_hook = { version = "0.1.7" }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
+
+[[test]]
+name = "test"
+required-features = ["single-threaded"]

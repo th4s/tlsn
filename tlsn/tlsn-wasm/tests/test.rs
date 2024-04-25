@@ -13,14 +13,8 @@ use wasm_bindgen_rayon::init_thread_pool;
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
-async fn test() -> Result<(), JsValue> {
+async fn test_interactive() -> Result<(), JsValue> {
     setup_tracing_web();
-
-    console::log_1(&"Hello, console log!".into());
-
-    tracing::info!("Hello, world!");
-
-    //spawn_local(JsFuture::from(init_thread_pool(8)).map(|_| ()));
 
     let se = Serializer::new().serialize_maps_as_objects(true);
 
@@ -61,23 +55,22 @@ async fn test() -> Result<(), JsValue> {
     .serialize(&se)
     .unwrap();
 
-    verifier
-        .connect("ws://0.tcp.ngrok.io:14339?clientId=bob")
-        .await?;
-
     futures::try_join!(
         async move {
-            prover
-                .setup("ws://0.tcp.ngrok.io:14339?clientId=alice")
-                .await?;
+            prover.setup("ws://127.0.0.1:8080").await?;
             prover
                 .send_request("wss://notary.pse.dev/proxy?token=swapi.dev", request)
                 .await?;
             prover.reveal(redact).await?;
 
-            Ok(())
+            Ok::<(), JsError>(())
         },
-        verifier.verify(),
+        async move {
+            verifier.connect("ws://127.0.0.1:8081").await?;
+            verifier.verify().await?;
+
+            Ok::<(), JsError>(())
+        }
     )?;
 
     Ok(())

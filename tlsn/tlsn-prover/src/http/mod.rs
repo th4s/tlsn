@@ -7,6 +7,7 @@
 
 pub mod state;
 
+use tlsn_core::commitment::TranscriptCommitmentBuilder;
 use tlsn_formats::{
     http::{DefaultHttpCommitter, HttpCommit, HttpCommitError, HttpTranscript},
     ParseError,
@@ -71,6 +72,11 @@ impl HttpProver<state::Notarize> {
             self.state.prover.commitment_builder(),
             &self.state.transcript,
         )
+    }
+
+    /// Returns the transcript commitment builder.
+    pub fn commitment_builder(&mut self) -> &mut TranscriptCommitmentBuilder {
+        self.state.prover.commitment_builder()
     }
 
     /// Finalizes the HTTP session.

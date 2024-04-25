@@ -114,3 +114,9 @@ pub struct Redact {
     pub sent: Vec<Vec<u8>>,
     pub received: Vec<Vec<u8>>,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct RevealConfig {
+    pub request_headers: Vec<Vec<String>>,
+    pub response_headers: Vec<Vec<String>>,
+}
