@@ -10,6 +10,7 @@ members = [
     "crates/components/stream-cipher",
     "crates/components/universal-hash",
     "crates/core",
+    "crates/data-fixtures",
     "crates/examples",
     "crates/formats",
     "crates/notary/client",
@@ -23,9 +24,9 @@ members = [
     "crates/tls/core",
     "crates/tls/mpc",
     "crates/tls/server-fixture",
-    "crates/wasm-test-runner",
     "crates/verifier",
     "crates/wasm",
+    "crates/wasm-test-runner",
 ]
 resolver = "2"
 
@@ -41,6 +42,7 @@ tlsn-aead = { path = "crates/components/aead" }
 tlsn-block-cipher = { path = "crates/components/block-cipher" }
 tlsn-common = { path = "crates/common" }
 tlsn-core = { path = "crates/core" }
+tlsn-data-fixtures = { path = "crates/data-fixtures" }
 tlsn-formats = { path = "crates/formats" }
 tlsn-hmac-sha256 = { path = "crates/components/hmac-sha256" }
 tlsn-hmac-sha256-circuits = { path = "crates/components/hmac-sha256-circuits" }
@@ -78,6 +80,7 @@ async-trait = { version = "0.1" }
 async-tungstenite = { version = "0.25" }
 axum = { version = "0.7" }
 bincode = { version = "1.3" }
+blake3 = { version = "1.5" }
 bytes = { version = "1.4" }
 chrono = { version = "0.4" }
 cipher = { version = "0.4" }
@@ -128,3 +131,4 @@ web-time = { version = "0.2" }
 webpki = { version = "0.22" }
 webpki-roots = { version = "0.26" }
 ws_stream_tungstenite = { version = "0.13" }
+zeroize = { version = "1.8" }
