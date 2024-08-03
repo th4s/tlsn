@@ -17,7 +17,6 @@ use web_time::{Duration, UNIX_EPOCH};
 use crate::{
     hash::{Hash, HashAlgorithm},
     serialize::CanonicalSerialize,
-    ValidationError,
 };
 
 pub use proof::{ServerIdentityProof, ServerIdentityProofError};
@@ -338,7 +337,7 @@ opaque_debug::implement!(CertificateSecrets);
 
 impl CertificateSecrets {
     /// Computes the commitment to the certificate and signature, returning `None` if the certificate is missing.
-    pub fn cert_commitment(&self, alg: HashAlgorithm) -> Option<Hash> {
+    pub fn cert_commitment<H: HashAlgorithm + ?Sized>(&self, alg: &H) -> Option<Hash> {
         let end_entity = self.data.certs.first()?;
         let mut bytes = Vec::new();
         bytes.extend(CanonicalSerialize::serialize(end_entity));
@@ -348,13 +347,18 @@ impl CertificateSecrets {
     }
 
     /// Computes the commitment to the certificate chain, returning `None` if the chain is missing.
-    pub fn cert_chain_commitment(&self, alg: HashAlgorithm) -> Option<Hash> {
+    pub fn cert_chain_commitment<H: HashAlgorithm + ?Sized>(&self, alg: &H) -> Option<Hash> {
+        if self.data.certs.is_empty() {
+            return None;
+        }
+
         let mut bytes = Vec::new();
         bytes.extend_from_slice(&(self.data.certs.len() as u32).to_le_bytes());
         for cert in &self.data.certs {
             bytes.extend(CanonicalSerialize::serialize(cert));
         }
         bytes.extend_from_slice(&self.chain_nonce);
+
         Some(alg.hash(&bytes))
     }
 }

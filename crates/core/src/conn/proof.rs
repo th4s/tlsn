@@ -5,7 +5,7 @@ use crate::{
     conn::{
         default_cert_verifier, CertificateSecrets, ConnectionInfo, HandshakeData, ServerIdentity,
     },
-    hash::Hash,
+    hash::{Hash, HashProvider, HashProviderError, TypedHash},
 };
 
 /// TLS server identity proof.
@@ -18,6 +18,9 @@ pub struct ServerIdentityProof {
 /// Server identity proof verification error.
 #[derive(Debug, thiserror::Error)]
 pub enum ServerIdentityProofError {
+    /// Hash provider error.
+    #[error("hash provider error: {0}")]
+    HashProvider(#[from] HashProviderError),
     /// Invalid commitment.
     #[error("invalid commitment")]
     InvalidCommitment,
@@ -38,12 +41,14 @@ impl ServerIdentityProof {
     /// * `chain_commitment` - The commitment to the certificate chain.
     pub fn verify_with_default_cert_verifier(
         self,
+        provider: &HashProvider,
         info: &ConnectionInfo,
         handshake_data: &HandshakeData,
-        cert_commitment: &Hash,
-        chain_commitment: &Hash,
+        cert_commitment: &TypedHash,
+        chain_commitment: &TypedHash,
     ) -> Result<ServerIdentity, ServerIdentityProofError> {
         self.verify(
+            provider,
             info,
             handshake_data,
             cert_commitment,
@@ -63,10 +68,11 @@ impl ServerIdentityProof {
     /// * `cert_verifier` - The certificate verifier.
     pub fn verify(
         self,
+        provider: &HashProvider,
         info: &ConnectionInfo,
         handshake_data: &HandshakeData,
-        cert_commitment: &Hash,
-        chain_commitment: &Hash,
+        cert_commitment: &TypedHash,
+        chain_commitment: &TypedHash,
         cert_verifier: &WebPkiVerifier,
     ) -> Result<ServerIdentity, ServerIdentityProofError> {
         // Verify certificate and identity.
@@ -80,15 +86,15 @@ impl ServerIdentityProof {
         // Verify commitments
         let expected_cert_commitment = self
             .cert_secrets
-            .cert_commitment(cert_commitment.algorithm())
+            .cert_commitment(provider.get(&cert_commitment.alg)?)
             .expect("cert should be present");
         let expected_chain_commitment = self
             .cert_secrets
-            .cert_chain_commitment(cert_commitment.algorithm())
+            .cert_chain_commitment(provider.get(&chain_commitment.alg)?)
             .expect("certs should be present");
 
-        if cert_commitment != &expected_cert_commitment
-            || chain_commitment != &expected_chain_commitment
+        if &cert_commitment.value != &expected_cert_commitment
+            || &chain_commitment.value != &expected_chain_commitment
         {
             return Err(ServerIdentityProofError::InvalidCommitment);
         }

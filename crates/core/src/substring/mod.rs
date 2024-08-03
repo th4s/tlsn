@@ -7,14 +7,76 @@ use serde::{Deserialize, Serialize};
 use crate::{
     attestation::{AttestationBody, FieldId, FieldKind},
     encoding::{EncodingProof, EncodingProofError},
-    hash::{HashAlgorithm, PlaintextHashProof, PlaintextHashProofError},
-    transcript::PartialTranscript,
+    hash::{HashAlgorithmId, HashProvider, HashProviderError, TypedHash},
+    transcript::{PartialTranscript, Subsequence, SubsequenceIdx},
 };
 
 pub use config::{
     SubstringCommitConfig, SubstringCommitConfigBuilder, SubstringCommitConfigBuilderError,
     SubstringProofConfig, SubstringProofConfigBuilder, SubstringProofConfigBuilderError,
 };
+
+/// A hash of a subsequence of plaintext in the transcript.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PlaintextHash {
+    /// The subsequence of plaintext.
+    pub seq: SubsequenceIdx,
+    /// The hash of the data.
+    pub hash: TypedHash,
+}
+
+/// A proof of the plaintext of a hash.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlaintextHashProof {
+    pub(crate) data: Vec<u8>,
+    pub(crate) nonce: [u8; 16],
+    pub(crate) commitment: FieldId,
+}
+
+/// An error for [`PlaintextHashProof`].
+#[derive(Debug, thiserror::Error)]
+#[error("invalid plaintext hash proof: {0}")]
+pub struct PlaintextHashProofError(String);
+
+impl PlaintextHashProofError {
+    fn new<T: Into<String>>(msg: T) -> Self {
+        Self(msg.into())
+    }
+}
+
+impl PlaintextHashProof {
+    /// Returns the field id of the commitment this opening corresponds to.
+    pub fn commitment_id(&self) -> &FieldId {
+        &self.commitment
+    }
+
+    /// Verifies the proof, returning the subsequence of plaintext.
+    ///
+    /// # Arguments
+    ///
+    /// * `commitment` - The commitment attested to by a Notary.
+    pub fn verify(
+        &self,
+        provider: &HashProvider,
+        commitment: &PlaintextHash,
+    ) -> Result<Subsequence, PlaintextHashProofError> {
+        let mut opening = self.data.clone();
+        opening.extend_from_slice(&self.nonce);
+
+        let alg = provider.get(&commitment.hash.alg).unwrap();
+
+        let expected_hash = alg.hash(&opening);
+
+        if expected_hash == commitment.hash.value {
+            Subsequence::new(commitment.seq.clone(), self.data.clone())
+                .map_err(|_| PlaintextHashProofError::new("proof contains invalid subsequence"))
+        } else {
+            Err(PlaintextHashProofError::new(
+                "hash does not match commitment",
+            ))
+        }
+    }
+}
 
 /// Kind of transcript commitment.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -24,7 +86,7 @@ pub enum SubstringCommitmentKind {
     /// A hash commitment to some plaintext in the transcript.
     Hash {
         /// The hash algorithm used.
-        alg: HashAlgorithm,
+        alg: HashAlgorithmId,
     },
 }
 
@@ -70,6 +132,7 @@ impl SubstringProof {
     /// * `attestation_body` - The attestation body to verify against.
     pub(crate) fn verify(
         self,
+        config: &HashProvider,
         attestation_body: &AttestationBody,
     ) -> Result<PartialTranscript, SubstringProofError> {
         let info = attestation_body.conn_info();
@@ -101,7 +164,7 @@ impl SubstringProof {
                 })
                 .ok_or_else(|| SubstringProofError::MissingField(FieldKind::PlaintextHash))?;
 
-            let seq = opening.verify(commitment)?;
+            let seq = opening.verify(config, commitment)?;
             transcript.union_subsequence(&seq);
         }
 

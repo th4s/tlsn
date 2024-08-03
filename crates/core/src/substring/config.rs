@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use utils::range::ToRangeSet;
 
 use crate::{
-    hash::HashAlgorithm,
+    hash::{HashAlgorithmId, BLAKE3},
     substring::SubstringCommitmentKind,
     transcript::{InvalidSubsequenceIdx, SubsequenceIdx},
     Direction, Transcript,
@@ -13,13 +13,13 @@ use crate::{
 /// Configuration for substring commitments.
 #[derive(Debug, Clone)]
 pub struct SubstringCommitConfig {
-    encoding_hash_alg: HashAlgorithm,
+    encoding_hash_alg: HashAlgorithmId,
     commits: Vec<(SubsequenceIdx, SubstringCommitmentKind)>,
 }
 
 impl SubstringCommitConfig {
     /// Returns the hash algorithm to use for encoding commitments.
-    pub fn encoding_hash_alg(&self) -> &HashAlgorithm {
+    pub fn encoding_hash_alg(&self) -> &HashAlgorithmId {
         &self.encoding_hash_alg
     }
 
@@ -39,7 +39,7 @@ impl SubstringCommitConfig {
     }
 
     /// Returns an iterator over the hash commitment indices.
-    pub fn iter_hash(&self) -> impl Iterator<Item = (&SubsequenceIdx, &HashAlgorithm)> {
+    pub fn iter_hash(&self) -> impl Iterator<Item = (&SubsequenceIdx, &HashAlgorithmId)> {
         self.commits.iter().filter_map(|(idx, kind)| match kind {
             SubstringCommitmentKind::Hash { alg } => Some((idx, alg)),
             _ => None,
@@ -75,7 +75,7 @@ pub enum SubstringCommitConfigBuilderError {
 #[derive(Debug)]
 pub struct SubstringCommitConfigBuilder {
     transcript: Transcript,
-    encoding_hash_alg: HashAlgorithm,
+    encoding_hash_alg: HashAlgorithmId,
     default_kind: SubstringCommitmentKind,
     // Hashset to prevent duplicates.
     commits: HashSet<(SubsequenceIdx, SubstringCommitmentKind)>,
@@ -86,14 +86,14 @@ impl SubstringCommitConfigBuilder {
     pub fn new(transcript: &Transcript) -> Self {
         Self {
             transcript: transcript.clone(),
-            encoding_hash_alg: HashAlgorithm::Blake3,
+            encoding_hash_alg: BLAKE3,
             default_kind: SubstringCommitmentKind::Encoding,
             commits: HashSet::default(),
         }
     }
 
     /// Sets the hash algorithm to use for encoding commitments.
-    pub fn encoding_hash_alg(&mut self, alg: HashAlgorithm) -> &mut Self {
+    pub fn encoding_hash_alg(&mut self, alg: HashAlgorithmId) -> &mut Self {
         self.encoding_hash_alg = alg;
         self
     }

@@ -10,7 +10,7 @@ use crate::{
         proof::{EncodingProof, Opening},
         EncodingProvider,
     },
-    hash::{Hash, HashAlgorithm},
+    hash::{Hash, HashAlgorithmId, TypedHash},
     merkle::MerkleTree,
     transcript::SubsequenceIdx,
     Direction, Transcript,
@@ -77,7 +77,7 @@ impl EncodingTree {
     /// * `provider` - The encoding provider.
     /// * `transcript_length` - The length of the transcript.
     pub fn new<'seq>(
-        alg: HashAlgorithm,
+        alg: HashAlgorithmId,
         seqs: impl Iterator<Item = &'seq SubsequenceIdx>,
         provider: &impl EncodingProvider,
         transcript_length: &TranscriptLength,
@@ -112,12 +112,12 @@ impl EncodingTree {
     }
 
     /// Returns the root of the tree.
-    pub fn root(&self) -> Hash {
+    pub fn root(&self) -> TypedHash {
         self.tree.root()
     }
 
     /// Returns the hash algorithm of the tree.
-    pub fn algorithm(&self) -> HashAlgorithm {
+    pub fn algorithm(&self) -> HashAlgorithmId {
         self.tree.algorithm()
     }
 
@@ -187,6 +187,7 @@ mod tests {
     use crate::{
         encoding::EncodingCommitment,
         fixtures::{encoder_seed, encoding_provider},
+        hash::BLAKE3,
     };
     use tlsn_data_fixtures::http::{request::POST_JSON, response::OK_JSON};
 
@@ -199,7 +200,7 @@ mod tests {
             sent: transcript.sent().len() as u32,
             received: transcript.received().len() as u32,
         };
-        EncodingTree::new(HashAlgorithm::Blake3, seqs, &provider, &transcript_length)
+        EncodingTree::new(BLAKE3, seqs, &provider, &transcript_length)
     }
 
     #[test]
@@ -283,7 +284,7 @@ mod tests {
         };
 
         let result = EncodingTree::new(
-            HashAlgorithm::Blake3,
+            BLAKE3,
             [SubsequenceIdx::new(Direction::Sent, 0..8).unwrap()].iter(),
             &provider,
             &transcript_length,
@@ -292,7 +293,7 @@ mod tests {
         assert!(matches!(result, EncodingTreeError::MissingEncoding { .. }));
 
         let result = EncodingTree::new(
-            HashAlgorithm::Blake3,
+            BLAKE3,
             [SubsequenceIdx::new(Direction::Received, 0..8).unwrap()].iter(),
             &provider,
             &transcript_length,

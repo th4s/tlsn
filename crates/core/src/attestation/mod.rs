@@ -12,7 +12,7 @@ use crate::{
         CertificateSecrets, ConnectionInfo, HandshakeData, ServerIdentity, ServerIdentityProof,
     },
     encoding::{EncodingCommitment, EncodingTree},
-    hash::{Hash, HashAlgorithm, PlaintextHash, PlaintextHashProof},
+    hash::{Hash, HashAlgorithmId, PlaintextHash, PlaintextHashProof, TypedHash},
     merkle::MerkleTree,
     serialize::CanonicalSerialize,
     substring::{SubstringProof, SubstringProofConfig, SubstringProofConfigBuilder},
@@ -287,7 +287,7 @@ pub struct AttestationHeader {
     /// Version of the attestation.
     pub version: AttestationVersion,
     /// Merkle root of the attestation fields.
-    pub root: Hash,
+    pub root: TypedHash,
 }
 
 impl AttestationHeader {
@@ -316,7 +316,7 @@ pub struct AttestationBody {
 
 impl AttestationBody {
     /// Computes the Merkle root of the attestation fields.
-    pub(crate) fn root(&self, alg: HashAlgorithm) -> Hash {
+    pub(crate) fn root(&self, alg: HashAlgorithmId) -> Hash {
         let mut tree = MerkleTree::new(alg);
         for (_, field) in self.sorted_fields() {
             tree.insert(field)

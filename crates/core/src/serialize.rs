@@ -7,7 +7,7 @@ use crate::{
         ServerSignature, TlsVersion,
     },
     encoding::EncodingLeaf,
-    hash::PlaintextHash,
+    substring::PlaintextHash,
 };
 
 /// Canonical serialization of TLSNotary types.
@@ -132,9 +132,11 @@ impl CanonicalSerialize for EncodingLeaf {
 
 impl CanonicalSerialize for PlaintextHash {
     fn serialize(&self) -> Vec<u8> {
+        let Self { seq, hash } = self;
+
         let mut bytes = Vec::new();
-        bytes.extend(CanonicalSerialize::serialize(&self.hash));
-        bytes.extend(CanonicalSerialize::serialize(&self.seq));
+        bytes.extend(CanonicalSerialize::serialize(hash));
+        bytes.extend(CanonicalSerialize::serialize(seq));
         bytes
     }
 }

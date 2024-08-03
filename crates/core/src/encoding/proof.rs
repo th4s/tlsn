@@ -7,7 +7,7 @@ use crate::{
     encoding::{
         new_encoder, tree::EncodingLeaf, Encoder, EncodingCommitment, MAX_TOTAL_COMMITTED_DATA,
     },
-    hash::HashAlgorithm,
+    hash::HashAlgorithmId,
     merkle::MerkleProof,
     transcript::{PartialTranscript, Subsequence},
     Direction,
@@ -41,9 +41,9 @@ pub enum EncodingProofError {
     #[error("proof uses the wrong hash algorithm: expected {expected:?}, got {actual:?}")]
     WrongHashAlgorithm {
         /// The expected hash algorithm.
-        expected: HashAlgorithm,
+        expected: HashAlgorithmId,
         /// The actual hash algorithm.
-        actual: HashAlgorithm,
+        actual: HashAlgorithmId,
     },
     /// Proof attempts to open more data than the maximum allowed.
     #[error("proof attempts to open more data than the maximum allowed")]

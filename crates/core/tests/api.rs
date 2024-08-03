@@ -24,7 +24,7 @@ use tlsn_core::{
     },
     encoding::{EncodingCommitment, EncodingTree},
     fixtures::{self, ConnectionFixture},
-    hash::HashAlgorithm,
+    hash::HashAlgorithmId,
     substring::{SubstringCommitConfigBuilder, SubstringProof, SubstringProofConfigBuilder},
     Signature, Transcript,
 };
@@ -54,10 +54,10 @@ fn test_api() {
     };
 
     let cert_commitment = certificate_secrets
-        .cert_commitment(HashAlgorithm::Blake3)
+        .cert_commitment(HashAlgorithmId::Blake3)
         .unwrap();
     let cert_chain_commiment = certificate_secrets
-        .cert_chain_commitment(HashAlgorithm::Blake3)
+        .cert_chain_commitment(HashAlgorithmId::Blake3)
         .unwrap();
 
     // Prover specifies the substrings it wants to commit to.
@@ -72,7 +72,7 @@ fn test_api() {
 
     // Prover constructs encoding tree.
     let encoding_tree = EncodingTree::new(
-        HashAlgorithm::Blake3,
+        HashAlgorithmId::Blake3,
         substrings_commitment_config.iter_encoding(),
         &encodings_provider,
         &transcript.length(),
@@ -110,7 +110,7 @@ fn test_api() {
     let attestation_header = AttestationHeader {
         id: thread_rng().gen::<[u8; 16]>().into(),
         version: ATTESTATION_VERSION.clone(),
-        root: attestation_body.root(HashAlgorithm::Blake3),
+        root: attestation_body.root(HashAlgorithmId::Blake3),
     };
 
     let sig = Signature::P256(signer.sign(&attestation_header.serialize()));
@@ -142,7 +142,7 @@ fn test_api() {
     let attestation_body = attestation_body;
 
     // Prover verifies the attestation root.
-    assert_eq!(&attestation_body.root(HashAlgorithm::Blake3), &header.root);
+    assert_eq!(&attestation_body.root(HashAlgorithmId::Blake3), &header.root);
 
     // Prover verifies the signature.
     #[allow(irrefutable_let_patterns)]
