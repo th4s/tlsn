@@ -7,6 +7,9 @@ mod server_tracing;
 mod service;
 mod util;
 
+#[cfg(feature = "attestation")]
+mod attestation;
+
 pub use config::{
     AuthorizationProperties, LoggingProperties, NotarizationProperties, NotaryServerProperties,
     NotarySigningKeyProperties, ServerProperties, TLSProperties,

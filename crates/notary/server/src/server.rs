@@ -43,6 +43,10 @@ use crate::{
     util::parse_csv_file,
 };
 
+#[cfg(feature = "attestation")]
+use crate::attestation::get_quote;
+
+
 /// Start a TCP server (with or without TLS) to accept notarization request for both TCP and WebSocket clients
 #[tracing::instrument(skip(config))]
 pub async fn run_server(config: &NotaryServerProperties) -> Result<(), NotaryServerError> {
@@ -139,6 +143,13 @@ pub async fn run_server(config: &NotaryServerProperties) -> Result<(), NotarySer
                     }),
                 )
                     .into_response()
+            }),
+        )
+        .route(
+            "/attestation",
+            get(|| async {
+                #[cfg(feature = "attestation")]
+                get_quote(None).await
             }),
         )
         .route("/session", post(initialize))
