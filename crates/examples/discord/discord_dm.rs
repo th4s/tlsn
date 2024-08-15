@@ -52,7 +52,7 @@ async fn main() {
     // Send requests for configuration and notarization to the notary server.
     let notarization_request = NotarizationRequest::builder()
         .max_sent_data(MAX_SENT_DATA)
-        .max_recv_data(MAX_RECV_DATA)
+        .max_deferred_size(MAX_RECV_DATA)
         .build()
         .unwrap();
 

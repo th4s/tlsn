@@ -104,7 +104,7 @@ async fn tcp_prover(notary_config: NotaryServerProperties) -> (NotaryConnection,
 
     let notarization_request = NotarizationRequest::builder()
         .max_sent_data(MAX_SENT_DATA)
-        .max_recv_data(MAX_RECV_DATA)
+        .max_recv_data_online(MAX_RECV_DATA)
         .build()
         .unwrap();
 
@@ -137,7 +137,7 @@ async fn tls_prover(notary_config: NotaryServerProperties) -> (NotaryConnection,
 
     let notarization_request = NotarizationRequest::builder()
         .max_sent_data(MAX_SENT_DATA)
-        .max_recv_data(MAX_RECV_DATA)
+        .max_recv_data_online(MAX_RECV_DATA)
         .build()
         .unwrap();
 
@@ -179,8 +179,9 @@ async fn test_tcp_prover<S: AsyncWrite + AsyncRead + Send + Unpin + 'static>(
     let prover_config = ProverConfig::builder()
         .id(session_id)
         .server_dns(SERVER_DOMAIN)
+        .defer_decryption_from_start(false)
         .max_sent_data(MAX_SENT_DATA)
-        .max_recv_data(MAX_RECV_DATA)
+        .max_recv_data_online(MAX_RECV_DATA)
         .root_cert_store(root_cert_store)
         .build()
         .unwrap();
@@ -276,7 +277,7 @@ async fn test_websocket_prover() {
     let payload = serde_json::to_string(&NotarizationSessionRequest {
         client_type: notary_server::ClientType::Websocket,
         max_sent_data: Some(MAX_SENT_DATA),
-        max_recv_data: Some(MAX_RECV_DATA),
+        max_recv_data_online: Some(MAX_RECV_DATA),
     })
     .unwrap();
 
@@ -354,9 +355,10 @@ async fn test_websocket_prover() {
     let prover_config = ProverConfig::builder()
         .id(notarization_response.session_id)
         .server_dns(SERVER_DOMAIN)
+        .defer_decryption_from_start(false)
         .root_cert_store(root_store)
         .max_sent_data(MAX_SENT_DATA)
-        .max_recv_data(MAX_RECV_DATA)
+        .max_recv_data_online(MAX_RECV_DATA)
         .build()
         .unwrap();
 
