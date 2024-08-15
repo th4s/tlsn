@@ -115,6 +115,7 @@ async fn leader(config: MpcTlsCommonConfig, mux: TestFramedMux) {
     let mut leader = MpcTlsLeader::new(
         MpcTlsLeaderConfig::builder()
             .common(config)
+            .defer_decryption_from_start(false)
             .build()
             .unwrap(),
         Box::new(StreamExt::compat_stream(
@@ -172,6 +173,8 @@ async fn leader(config: MpcTlsCommonConfig, mux: TestFramedMux) {
     conn.read_exact(&mut buf).await.unwrap();
 
     println!("{}", String::from_utf8_lossy(&buf));
+
+    leader_ctrl.defer_decryption().await.unwrap();
 
     let msg = concat!(
         "POST /echo HTTP/1.1\r\n",
