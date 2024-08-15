@@ -49,6 +49,7 @@ async fn prover<T: AsyncWrite + AsyncRead + Send + Unpin + 'static>(notary_socke
             .root_cert_store(root_store)
             .defer_decryption_from_start(false)
             .max_recv_data_online(DEFAULT_MAX_RECV_LIMIT)
+            .max_deferred_size(0)
             .build()
             .unwrap(),
     )
@@ -109,6 +110,7 @@ async fn verifier<T: AsyncWrite + AsyncRead + Send + Sync + Unpin + 'static>(
     let verifier_config = VerifierConfig::builder()
         .id("test")
         .max_recv_data_online(DEFAULT_MAX_RECV_LIMIT)
+        .max_deferred_size(0)
         .cert_verifier(WebPkiVerifier::new(root_store, None))
         .build()
         .unwrap();
