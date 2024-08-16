@@ -519,6 +519,12 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_encrypt_private() {
+        let subscriber = tracing_subscriber::fmt()
+            .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+            .with_max_level(Level::TRACE)
+            .finish();
+        tracing::subscriber::set_default(subscriber);
+
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -543,6 +549,12 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_encrypt_public() {
+        let subscriber = tracing_subscriber::fmt()
+            .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+            .with_max_level(Level::TRACE)
+            .finish();
+        tracing::subscriber::set_default(subscriber);
+
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -567,6 +579,12 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_private() {
+        let subscriber = tracing_subscriber::fmt()
+            .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+            .with_max_level(Level::TRACE)
+            .finish();
+        tracing::subscriber::set_default(subscriber);
+
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -588,6 +606,12 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_private_bad_tag() {
+        let subscriber = tracing_subscriber::fmt()
+            .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+            .with_max_level(Level::TRACE)
+            .finish();
+        tracing::subscriber::set_default(subscriber);
+
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -629,7 +653,7 @@ mod tests {
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
             .with_max_level(Level::TRACE)
             .finish();
-        let tracing = tracing::subscriber::set_default(subscriber);
+        tracing::subscriber::set_default(subscriber);
 
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
@@ -653,6 +677,12 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_public_bad_tag() {
+        let subscriber = tracing_subscriber::fmt()
+            .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+            .with_max_level(Level::TRACE)
+            .finish();
+        tracing::subscriber::set_default(subscriber);
+
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -690,6 +720,12 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_verify_tag() {
+        let subscriber = tracing_subscriber::fmt()
+            .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+            .with_max_level(Level::TRACE)
+            .finish();
+        tracing::subscriber::set_default(subscriber);
+
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
