@@ -129,3 +129,12 @@ webpki = { version = "0.22" }
 webpki-roots = { version = "0.26" }
 ws_stream_tungstenite = { version = "0.13" }
 
+[patch."https://github.com/privacy-scaling-explorations//mpz"]
+mpz-circuits = { git = "https://github.com/privacy-scaling-explorations/mpz", branch = "aead-failing-tests" }
+mpz-common = { git = "https://github.com/privacy-scaling-explorations/mpz", branch = "aead-failing-tests" }
+mpz-core = { git = "https://github.com/privacy-scaling-explorations/mpz", branch = "aead-failing-tests" }
+mpz-garble = { git = "https://github.com/privacy-scaling-explorations/mpz", branch = "aead-failing-tests" }
+mpz-garble-core = { git = "https://github.com/privacy-scaling-explorations/mpz", branch = "aead-failing-tests" }
+mpz-ole = { git = "https://github.com/privacy-scaling-explorations/mpz", branch = "aead-failing-tests" }
+mpz-ot = { git = "https://github.com/privacy-scaling-explorations/mpz", branch = "aead-failing-tests" }
+mpz-share-conversion = { git = "https://github.com/privacy-scaling-explorations/mpz", branch = "aead-failing-tests" }
