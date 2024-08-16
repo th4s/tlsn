@@ -597,7 +597,6 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_private_bad_tag() {
-        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
