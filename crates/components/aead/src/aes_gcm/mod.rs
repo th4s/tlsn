@@ -434,6 +434,8 @@ mod tests {
     use mpz_common::executor::STExecutor;
     use mpz_garble::{protocol::deap::mock::create_mock_deap_vm, Memory};
     use serio::channel::MemoryDuplex;
+    use tracing::Level;
+    use tracing_subscriber::fmt::format::FmtSpan;
 
     fn reference_impl(
         key: &[u8],
@@ -461,6 +463,12 @@ mod tests {
         MpcAesGcm<STExecutor<MemoryDuplex>>,
         MpcAesGcm<STExecutor<MemoryDuplex>>,
     ) {
+        let subscriber = tracing_subscriber::fmt()
+            .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+            .with_max_level(Level::TRACE)
+            .finish();
+        tracing::subscriber::set_global_default(subscriber).unwrap();
+
         let (leader_vm, follower_vm) = create_mock_deap_vm();
 
         let leader_key = leader_vm
