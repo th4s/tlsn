@@ -523,7 +523,7 @@ mod tests {
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
             .with_max_level(Level::TRACE)
             .finish();
-        tracing::subscriber::set_default(subscriber);
+        let tracing = tracing::subscriber::set_default(subscriber);
 
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
@@ -553,7 +553,7 @@ mod tests {
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
             .with_max_level(Level::TRACE)
             .finish();
-        tracing::subscriber::set_default(subscriber);
+        let tracing = tracing::subscriber::set_default(subscriber);
 
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
@@ -583,7 +583,7 @@ mod tests {
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
             .with_max_level(Level::TRACE)
             .finish();
-        tracing::subscriber::set_default(subscriber);
+        let tracing = tracing::subscriber::set_default(subscriber);
 
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
@@ -610,7 +610,7 @@ mod tests {
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
             .with_max_level(Level::TRACE)
             .finish();
-        tracing::subscriber::set_default(subscriber);
+        let tracing = tracing::subscriber::set_default(subscriber);
 
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
@@ -653,7 +653,7 @@ mod tests {
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
             .with_max_level(Level::TRACE)
             .finish();
-        tracing::subscriber::set_default(subscriber);
+        let tracing = tracing::subscriber::set_default(subscriber);
 
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
@@ -681,7 +681,7 @@ mod tests {
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
             .with_max_level(Level::TRACE)
             .finish();
-        tracing::subscriber::set_default(subscriber);
+        let tracing = tracing::subscriber::set_default(subscriber);
 
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
@@ -724,7 +724,7 @@ mod tests {
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
             .with_max_level(Level::TRACE)
             .finish();
-        tracing::subscriber::set_default(subscriber);
+        let tracing = tracing::subscriber::set_default(subscriber);
 
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
