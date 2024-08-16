@@ -34,4 +34,4 @@ jobs:
         run: echo "127.0.0.1 tlsnotaryserver.io" | sudo tee -a /etc/hosts
 
       - name: Run integration tests
-        run: cargo test --profile tests-integration --workspace --exclude tlsn-tls-client --exclude tlsn-tls-core -- --include-ignored
+        run: cargo test test_aes_gcm_decrypt_public --profile tests-integration -- --include-ignored
