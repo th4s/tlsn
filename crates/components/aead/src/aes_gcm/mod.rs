@@ -434,7 +434,7 @@ mod tests {
     use mpz_common::executor::STExecutor;
     use mpz_garble::{protocol::deap::mock::create_mock_deap_vm, Memory};
     use serio::channel::MemoryDuplex;
-    use tracing::{field::debug, subscriber::DefaultGuard, Level};
+    use tracing::{info, subscriber::DefaultGuard, Level};
     use tracing_subscriber::fmt::format::FmtSpan;
 
     fn reference_impl(
@@ -473,9 +473,6 @@ mod tests {
         MpcAesGcm<STExecutor<MemoryDuplex>>,
         MpcAesGcm<STExecutor<MemoryDuplex>>,
     ) {
-        debug("Starting setup pair.");
-        debug("Setting up logging.");
-
         let (leader_vm, follower_vm) = create_mock_deap_vm();
 
         let leader_key = leader_vm
@@ -516,220 +513,345 @@ mod tests {
             follower_config,
         )
         .await;
-        debug("setting keys");
 
         futures::try_join!(
             leader.set_key(leader_key, leader_iv),
             follower.set_key(follower_key, follower_iv)
         )
         .unwrap();
-        debug("setting up....");
 
         futures::try_join!(leader.setup(), follower.setup()).unwrap();
         futures::try_join!(leader.start(), follower.start()).unwrap();
-        debug("setup pair finished");
 
         (leader, follower)
     }
 
-    #[tokio::test]
+    #[test]
     #[ignore = "expensive"]
-    async fn test_aes_gcm_encrypt_private() {
-        let key = vec![0u8; 16];
-        let iv = vec![0u8; 4];
-        let explicit_nonce = vec![0u8; 8];
-        let plaintext = vec![1u8; 32];
-        let aad = vec![2u8; 12];
-
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
-
-        let (leader_ciphertext, follower_ciphertext) = tokio::try_join!(
-            leader.encrypt_private(explicit_nonce.clone(), plaintext.clone(), aad.clone(),),
-            follower.encrypt_blind(explicit_nonce.clone(), plaintext.len(), aad.clone())
-        )
-        .unwrap();
-
-        assert_eq!(leader_ciphertext, follower_ciphertext);
-        assert_eq!(
-            leader_ciphertext,
-            reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad)
-        );
-    }
-
-    #[tokio::test]
-    #[ignore = "expensive"]
-    async fn test_aes_gcm_encrypt_public() {
-        let key = vec![0u8; 16];
-        let iv = vec![0u8; 4];
-        let explicit_nonce = vec![0u8; 8];
-        let plaintext = vec![1u8; 32];
-        let aad = vec![2u8; 12];
-
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
-
-        let (leader_ciphertext, follower_ciphertext) = tokio::try_join!(
-            leader.encrypt_public(explicit_nonce.clone(), plaintext.clone(), aad.clone(),),
-            follower.encrypt_public(explicit_nonce.clone(), plaintext.clone(), aad.clone(),)
-        )
-        .unwrap();
-
-        assert_eq!(leader_ciphertext, follower_ciphertext);
-        assert_eq!(
-            leader_ciphertext,
-            reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad)
-        );
-    }
-
-    #[tokio::test]
-    #[ignore = "expensive"]
-    async fn test_aes_gcm_decrypt_private() {
+    fn test_aes_gcm_encrypt_private() {
         let _guard = setup_tracing();
-        let key = vec![0u8; 16];
-        let iv = vec![0u8; 4];
-        let explicit_nonce = vec![0u8; 8];
-        let plaintext = vec![1u8; 32];
-        let aad = vec![2u8; 12];
-        let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
+        for _ in 0..100 {
+            tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(async {
+                    info!("---------------------NEW ITERATION-------------------------------");
+                    let key = vec![0u8; 16];
+                    let iv = vec![0u8; 4];
+                    let explicit_nonce = vec![0u8; 8];
+                    let plaintext = vec![1u8; 32];
+                    let aad = vec![2u8; 12];
 
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
 
-        let (leader_plaintext, _) = tokio::try_join!(
-            leader.decrypt_private(explicit_nonce.clone(), ciphertext.clone(), aad.clone(),),
-            follower.decrypt_blind(explicit_nonce.clone(), ciphertext, aad.clone(),)
-        )
-        .unwrap();
+                    let (leader_ciphertext, follower_ciphertext) = tokio::try_join!(
+                        leader.encrypt_private(
+                            explicit_nonce.clone(),
+                            plaintext.clone(),
+                            aad.clone(),
+                        ),
+                        follower.encrypt_blind(
+                            explicit_nonce.clone(),
+                            plaintext.len(),
+                            aad.clone()
+                        )
+                    )
+                    .unwrap();
 
-        assert_eq!(leader_plaintext, plaintext);
+                    assert_eq!(leader_ciphertext, follower_ciphertext);
+                    assert_eq!(
+                        leader_ciphertext,
+                        reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad)
+                    );
+                })
+        }
     }
 
-    #[tokio::test]
+    #[test]
     #[ignore = "expensive"]
-    async fn test_aes_gcm_decrypt_private_bad_tag() {
+    fn test_aes_gcm_encrypt_public() {
         let _guard = setup_tracing();
-        let key = vec![0u8; 16];
-        let iv = vec![0u8; 4];
-        let explicit_nonce = vec![0u8; 8];
-        let plaintext = vec![1u8; 32];
-        let aad = vec![2u8; 12];
-        let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
+        for _ in 0..100 {
+            tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(async {
+                    info!("---------------------NEW ITERATION-------------------------------");
+                    let key = vec![0u8; 16];
+                    let iv = vec![0u8; 4];
+                    let explicit_nonce = vec![0u8; 8];
+                    let plaintext = vec![1u8; 32];
+                    let aad = vec![2u8; 12];
 
-        let len = ciphertext.len();
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
 
-        // corrupt tag
-        let mut corrupted = ciphertext.clone();
-        corrupted[len - 1] -= 1;
+                    let (leader_ciphertext, follower_ciphertext) = tokio::try_join!(
+                        leader.encrypt_public(
+                            explicit_nonce.clone(),
+                            plaintext.clone(),
+                            aad.clone(),
+                        ),
+                        follower.encrypt_public(
+                            explicit_nonce.clone(),
+                            plaintext.clone(),
+                            aad.clone(),
+                        )
+                    )
+                    .unwrap();
 
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
-
-        // leader receives corrupted tag
-        let err = tokio::try_join!(
-            leader.decrypt_private(explicit_nonce.clone(), corrupted.clone(), aad.clone(),),
-            follower.decrypt_blind(explicit_nonce.clone(), ciphertext.clone(), aad.clone(),)
-        )
-        .unwrap_err();
-        assert_eq!(err.kind(), ErrorKind::Tag);
-
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
-
-        // follower receives corrupted tag
-        let err = tokio::try_join!(
-            leader.decrypt_private(explicit_nonce.clone(), ciphertext.clone(), aad.clone(),),
-            follower.decrypt_blind(explicit_nonce.clone(), corrupted.clone(), aad.clone(),)
-        )
-        .unwrap_err();
-        assert_eq!(err.kind(), ErrorKind::Tag);
+                    assert_eq!(leader_ciphertext, follower_ciphertext);
+                    assert_eq!(
+                        leader_ciphertext,
+                        reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad)
+                    );
+                })
+        }
     }
 
-    #[tokio::test]
+    #[test]
     #[ignore = "expensive"]
-    async fn test_aes_gcm_decrypt_public() {
+    fn test_aes_gcm_decrypt_private() {
         let _guard = setup_tracing();
-        let key = vec![0u8; 16];
-        let iv = vec![0u8; 4];
-        let explicit_nonce = vec![0u8; 8];
-        let plaintext = vec![1u8; 32];
-        let aad = vec![2u8; 12];
-        let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
+        for _ in 0..100 {
+            tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(async {
+                    info!("---------------------NEW ITERATION-------------------------------");
+                    let key = vec![0u8; 16];
+                    let iv = vec![0u8; 4];
+                    let explicit_nonce = vec![0u8; 8];
+                    let plaintext = vec![1u8; 32];
+                    let aad = vec![2u8; 12];
+                    let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
 
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
 
-        let (leader_plaintext, follower_plaintext) = tokio::try_join!(
-            leader.decrypt_public(explicit_nonce.clone(), ciphertext.clone(), aad.clone(),),
-            follower.decrypt_public(explicit_nonce.clone(), ciphertext, aad.clone(),)
-        )
-        .unwrap();
+                    let (leader_plaintext, _) = tokio::try_join!(
+                        leader.decrypt_private(
+                            explicit_nonce.clone(),
+                            ciphertext.clone(),
+                            aad.clone(),
+                        ),
+                        follower.decrypt_blind(explicit_nonce.clone(), ciphertext, aad.clone(),)
+                    )
+                    .unwrap();
 
-        assert_eq!(leader_plaintext, plaintext);
-        assert_eq!(leader_plaintext, follower_plaintext);
+                    assert_eq!(leader_plaintext, plaintext);
+                })
+        }
     }
 
-    #[tokio::test]
+    #[test]
     #[ignore = "expensive"]
-    async fn test_aes_gcm_decrypt_public_bad_tag() {
-        let key = vec![0u8; 16];
-        let iv = vec![0u8; 4];
-        let explicit_nonce = vec![0u8; 8];
-        let plaintext = vec![1u8; 32];
-        let aad = vec![2u8; 12];
-        let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
+    fn test_aes_gcm_decrypt_private_bad_tag() {
+        let _guard = setup_tracing();
+        for _ in 0..100 {
+            tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(async {
+                    info!("---------------------NEW ITERATION-------------------------------");
+                    let key = vec![0u8; 16];
+                    let iv = vec![0u8; 4];
+                    let explicit_nonce = vec![0u8; 8];
+                    let plaintext = vec![1u8; 32];
+                    let aad = vec![2u8; 12];
+                    let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
 
-        let len = ciphertext.len();
+                    let len = ciphertext.len();
 
-        // Corrupt tag.
-        let mut corrupted = ciphertext.clone();
-        corrupted[len - 1] -= 1;
+                    // corrupt tag
+                    let mut corrupted = ciphertext.clone();
+                    corrupted[len - 1] -= 1;
 
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
 
-        // Leader receives corrupted tag.
-        let err = tokio::try_join!(
-            leader.decrypt_public(explicit_nonce.clone(), corrupted.clone(), aad.clone(),),
-            follower.decrypt_public(explicit_nonce.clone(), ciphertext.clone(), aad.clone(),)
-        )
-        .unwrap_err();
-        assert_eq!(err.kind(), ErrorKind::Tag);
+                    // leader receives corrupted tag
+                    let err = tokio::try_join!(
+                        leader.decrypt_private(
+                            explicit_nonce.clone(),
+                            corrupted.clone(),
+                            aad.clone(),
+                        ),
+                        follower.decrypt_blind(
+                            explicit_nonce.clone(),
+                            ciphertext.clone(),
+                            aad.clone(),
+                        )
+                    )
+                    .unwrap_err();
+                    assert_eq!(err.kind(), ErrorKind::Tag);
 
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
 
-        // Follower receives corrupted tag.
-        let err = tokio::try_join!(
-            leader.decrypt_public(explicit_nonce.clone(), ciphertext.clone(), aad.clone(),),
-            follower.decrypt_public(explicit_nonce.clone(), corrupted.clone(), aad.clone(),)
-        )
-        .unwrap_err();
-        assert_eq!(err.kind(), ErrorKind::Tag);
+                    // follower receives corrupted tag
+                    let err = tokio::try_join!(
+                        leader.decrypt_private(
+                            explicit_nonce.clone(),
+                            ciphertext.clone(),
+                            aad.clone(),
+                        ),
+                        follower.decrypt_blind(
+                            explicit_nonce.clone(),
+                            corrupted.clone(),
+                            aad.clone(),
+                        )
+                    )
+                    .unwrap_err();
+                    assert_eq!(err.kind(), ErrorKind::Tag);
+                })
+        }
     }
 
-    #[tokio::test]
+    #[test]
     #[ignore = "expensive"]
-    async fn test_aes_gcm_verify_tag() {
-        let key = vec![0u8; 16];
-        let iv = vec![0u8; 4];
-        let explicit_nonce = vec![0u8; 8];
-        let plaintext = vec![1u8; 32];
-        let aad = vec![2u8; 12];
-        let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
+    fn test_aes_gcm_decrypt_public() {
+        let _guard = setup_tracing();
+        for _ in 0..100 {
+            tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(async {
+                    info!("---------------------NEW ITERATION-------------------------------");
+                    let _guard = setup_tracing();
+                    let key = vec![0u8; 16];
+                    let iv = vec![0u8; 4];
+                    let explicit_nonce = vec![0u8; 8];
+                    let plaintext = vec![1u8; 32];
+                    let aad = vec![2u8; 12];
+                    let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
 
-        let len = ciphertext.len();
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
 
-        let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
+                    let (leader_plaintext, follower_plaintext) = tokio::try_join!(
+                        leader.decrypt_public(
+                            explicit_nonce.clone(),
+                            ciphertext.clone(),
+                            aad.clone(),
+                        ),
+                        follower.decrypt_public(explicit_nonce.clone(), ciphertext, aad.clone(),)
+                    )
+                    .unwrap();
 
-        tokio::try_join!(
-            leader.verify_tag(explicit_nonce.clone(), ciphertext.clone(), aad.clone()),
-            follower.verify_tag(explicit_nonce.clone(), ciphertext.clone(), aad.clone())
-        )
-        .unwrap();
+                    assert_eq!(leader_plaintext, plaintext);
+                    assert_eq!(leader_plaintext, follower_plaintext);
+                })
+        }
+    }
 
-        //Corrupt tag.
-        let mut corrupted = ciphertext.clone();
-        corrupted[len - 1] -= 1;
+    #[test]
+    #[ignore = "expensive"]
+    fn test_aes_gcm_decrypt_public_bad_tag() {
+        let _guard = setup_tracing();
+        for _ in 0..100 {
+            tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(async {
+                    info!("---------------------NEW ITERATION-------------------------------");
+                    let key = vec![0u8; 16];
+                    let iv = vec![0u8; 4];
+                    let explicit_nonce = vec![0u8; 8];
+                    let plaintext = vec![1u8; 32];
+                    let aad = vec![2u8; 12];
+                    let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
 
-        let (leader_res, follower_res) = tokio::join!(
-            leader.verify_tag(explicit_nonce.clone(), corrupted.clone(), aad.clone()),
-            follower.verify_tag(explicit_nonce.clone(), corrupted, aad.clone())
-        );
+                    let len = ciphertext.len();
 
-        assert_eq!(leader_res.unwrap_err().kind(), ErrorKind::Tag);
-        assert_eq!(follower_res.unwrap_err().kind(), ErrorKind::Tag);
+                    // Corrupt tag.
+                    let mut corrupted = ciphertext.clone();
+                    corrupted[len - 1] -= 1;
+
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
+
+                    // Leader receives corrupted tag.
+                    let err = tokio::try_join!(
+                        leader.decrypt_public(
+                            explicit_nonce.clone(),
+                            corrupted.clone(),
+                            aad.clone(),
+                        ),
+                        follower.decrypt_public(
+                            explicit_nonce.clone(),
+                            ciphertext.clone(),
+                            aad.clone(),
+                        )
+                    )
+                    .unwrap_err();
+                    assert_eq!(err.kind(), ErrorKind::Tag);
+
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
+
+                    // Follower receives corrupted tag.
+                    let err = tokio::try_join!(
+                        leader.decrypt_public(
+                            explicit_nonce.clone(),
+                            ciphertext.clone(),
+                            aad.clone(),
+                        ),
+                        follower.decrypt_public(
+                            explicit_nonce.clone(),
+                            corrupted.clone(),
+                            aad.clone(),
+                        )
+                    )
+                    .unwrap_err();
+                    assert_eq!(err.kind(), ErrorKind::Tag);
+                })
+        }
+    }
+
+    #[test]
+    #[ignore = "expensive"]
+    fn test_aes_gcm_verify_tag() {
+        let _guard = setup_tracing();
+        for _ in 0..100 {
+            tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .unwrap()
+                .block_on(async {
+                    info!("---------------------NEW ITERATION-------------------------------");
+                    let key = vec![0u8; 16];
+                    let iv = vec![0u8; 4];
+                    let explicit_nonce = vec![0u8; 8];
+                    let plaintext = vec![1u8; 32];
+                    let aad = vec![2u8; 12];
+                    let ciphertext = reference_impl(&key, &iv, &explicit_nonce, &plaintext, &aad);
+
+                    let len = ciphertext.len();
+
+                    let (mut leader, mut follower) = setup_pair(key.clone(), iv.clone()).await;
+
+                    tokio::try_join!(
+                        leader.verify_tag(explicit_nonce.clone(), ciphertext.clone(), aad.clone()),
+                        follower.verify_tag(
+                            explicit_nonce.clone(),
+                            ciphertext.clone(),
+                            aad.clone()
+                        )
+                    )
+                    .unwrap();
+
+                    //Corrupt tag.
+                    let mut corrupted = ciphertext.clone();
+                    corrupted[len - 1] -= 1;
+
+                    let (leader_res, follower_res) = tokio::join!(
+                        leader.verify_tag(explicit_nonce.clone(), corrupted.clone(), aad.clone()),
+                        follower.verify_tag(explicit_nonce.clone(), corrupted, aad.clone())
+                    );
+
+                    assert_eq!(leader_res.unwrap_err().kind(), ErrorKind::Tag);
+                    assert_eq!(follower_res.unwrap_err().kind(), ErrorKind::Tag);
+                })
+        }
     }
 }
