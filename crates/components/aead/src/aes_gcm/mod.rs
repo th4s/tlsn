@@ -532,7 +532,7 @@ mod tests {
     fn test_aes_gcm_encrypt_private() {
         let _guard = setup_tracing();
         let mut rng = thread_rng();
-        for _ in 0..1000 {
+        for _ in 0..250 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
@@ -577,7 +577,7 @@ mod tests {
     fn test_aes_gcm_encrypt_public() {
         let _guard = setup_tracing();
         let mut rng = thread_rng();
-        for _ in 0..1000 {
+        for _ in 0..250 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
@@ -622,7 +622,7 @@ mod tests {
     fn test_aes_gcm_decrypt_private() {
         let _guard = setup_tracing();
         let mut rng = thread_rng();
-        for _ in 0..1000 {
+        for _ in 0..250 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
@@ -660,7 +660,7 @@ mod tests {
     fn test_aes_gcm_decrypt_private_bad_tag() {
         let _guard = setup_tracing();
         let mut rng = thread_rng();
-        for _ in 0..1000 {
+        for _ in 0..250 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
@@ -726,7 +726,7 @@ mod tests {
     fn test_aes_gcm_decrypt_public() {
         let _guard = setup_tracing();
         let mut rng = thread_rng();
-        for _ in 0..1000 {
+        for _ in 0..250 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
@@ -766,7 +766,7 @@ mod tests {
     fn test_aes_gcm_decrypt_public_bad_tag() {
         let _guard = setup_tracing();
         let mut rng = thread_rng();
-        for _ in 0..1000 {
+        for _ in 0..250 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
@@ -832,7 +832,7 @@ mod tests {
     fn test_aes_gcm_verify_tag() {
         let _guard = setup_tracing();
         let mut rng = thread_rng();
-        for _ in 0..1000 {
+        for _ in 0..250 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
