@@ -458,7 +458,8 @@ mod tests {
 
     fn setup_tracing() -> DefaultGuard {
         let subscriber = tracing_subscriber::fmt()
-            .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
+            .with_span_events(FmtSpan::FULL)
+            .with_thread_ids(true)
             .with_max_level(Level::TRACE)
             .finish();
         tracing::subscriber::set_default(subscriber)
