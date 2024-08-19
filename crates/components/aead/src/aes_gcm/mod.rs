@@ -434,7 +434,7 @@ mod tests {
     use mpz_common::executor::STExecutor;
     use mpz_garble::{protocol::deap::mock::create_mock_deap_vm, Memory};
     use serio::channel::MemoryDuplex;
-    use tracing::{subscriber::DefaultGuard, Level};
+    use tracing::{field::debug, subscriber::DefaultGuard, Level};
     use tracing_subscriber::fmt::format::FmtSpan;
 
     fn reference_impl(
@@ -472,6 +472,7 @@ mod tests {
         MpcAesGcm<STExecutor<MemoryDuplex>>,
         MpcAesGcm<STExecutor<MemoryDuplex>>,
     ) {
+        debug("Starting setup pair.");
         let (leader_vm, follower_vm) = create_mock_deap_vm();
 
         let leader_key = leader_vm
@@ -512,15 +513,18 @@ mod tests {
             follower_config,
         )
         .await;
+        debug("setting keys");
 
         futures::try_join!(
             leader.set_key(leader_key, leader_iv),
             follower.set_key(follower_key, follower_iv)
         )
         .unwrap();
+        debug("setting up....");
 
         futures::try_join!(leader.setup(), follower.setup()).unwrap();
         futures::try_join!(leader.start(), follower.start()).unwrap();
+        debug("setup pair finished");
 
         (leader, follower)
     }
