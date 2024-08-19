@@ -433,6 +433,7 @@ mod tests {
     use error::ErrorKind;
     use mpz_common::executor::STExecutor;
     use mpz_garble::{protocol::deap::mock::create_mock_deap_vm, Memory};
+    use rand::{thread_rng, Rng};
     use serio::channel::MemoryDuplex;
     use tracing::{info, subscriber::DefaultGuard, Level};
     use tracing_subscriber::fmt::format::FmtSpan;
@@ -530,12 +531,15 @@ mod tests {
     #[ignore = "expensive"]
     fn test_aes_gcm_encrypt_private() {
         let _guard = setup_tracing();
-        for _ in 0..100 {
+        let mut rng = thread_rng();
+        for _ in 0..1000 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
                 .unwrap()
                 .block_on(async {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(rng.gen_range(0..1000)))
+                        .await;
                     info!("---------------------NEW ITERATION-------------------------------");
                     let key = vec![0u8; 16];
                     let iv = vec![0u8; 4];
@@ -572,12 +576,15 @@ mod tests {
     #[ignore = "expensive"]
     fn test_aes_gcm_encrypt_public() {
         let _guard = setup_tracing();
-        for _ in 0..100 {
+        let mut rng = thread_rng();
+        for _ in 0..1000 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
                 .unwrap()
                 .block_on(async {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(rng.gen_range(0..1000)))
+                        .await;
                     info!("---------------------NEW ITERATION-------------------------------");
                     let key = vec![0u8; 16];
                     let iv = vec![0u8; 4];
@@ -614,12 +621,15 @@ mod tests {
     #[ignore = "expensive"]
     fn test_aes_gcm_decrypt_private() {
         let _guard = setup_tracing();
-        for _ in 0..100 {
+        let mut rng = thread_rng();
+        for _ in 0..1000 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
                 .unwrap()
                 .block_on(async {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(rng.gen_range(0..1000)))
+                        .await;
                     info!("---------------------NEW ITERATION-------------------------------");
                     let key = vec![0u8; 16];
                     let iv = vec![0u8; 4];
@@ -649,12 +659,15 @@ mod tests {
     #[ignore = "expensive"]
     fn test_aes_gcm_decrypt_private_bad_tag() {
         let _guard = setup_tracing();
-        for _ in 0..100 {
+        let mut rng = thread_rng();
+        for _ in 0..1000 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
                 .unwrap()
                 .block_on(async {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(rng.gen_range(0..1000)))
+                        .await;
                     info!("---------------------NEW ITERATION-------------------------------");
                     let key = vec![0u8; 16];
                     let iv = vec![0u8; 4];
@@ -712,12 +725,15 @@ mod tests {
     #[ignore = "expensive"]
     fn test_aes_gcm_decrypt_public() {
         let _guard = setup_tracing();
-        for _ in 0..100 {
+        let mut rng = thread_rng();
+        for _ in 0..1000 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
                 .unwrap()
                 .block_on(async {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(rng.gen_range(0..1000)))
+                        .await;
                     info!("---------------------NEW ITERATION-------------------------------");
                     let _guard = setup_tracing();
                     let key = vec![0u8; 16];
@@ -749,12 +765,15 @@ mod tests {
     #[ignore = "expensive"]
     fn test_aes_gcm_decrypt_public_bad_tag() {
         let _guard = setup_tracing();
-        for _ in 0..100 {
+        let mut rng = thread_rng();
+        for _ in 0..1000 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
                 .unwrap()
                 .block_on(async {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(rng.gen_range(0..1000)))
+                        .await;
                     info!("---------------------NEW ITERATION-------------------------------");
                     let key = vec![0u8; 16];
                     let iv = vec![0u8; 4];
@@ -812,12 +831,15 @@ mod tests {
     #[ignore = "expensive"]
     fn test_aes_gcm_verify_tag() {
         let _guard = setup_tracing();
-        for _ in 0..100 {
+        let mut rng = thread_rng();
+        for _ in 0..1000 {
             tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
                 .unwrap()
                 .block_on(async {
+                    tokio::time::sleep(tokio::time::Duration::from_millis(rng.gen_range(0..1000)))
+                        .await;
                     info!("---------------------NEW ITERATION-------------------------------");
                     let key = vec![0u8; 16];
                     let iv = vec![0u8; 4];
