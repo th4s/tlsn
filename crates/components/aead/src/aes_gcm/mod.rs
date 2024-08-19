@@ -423,8 +423,6 @@ impl<Ctx: Context> Aead for MpcAesGcm<Ctx> {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Once;
-
     use super::*;
 
     use crate::{
@@ -438,8 +436,6 @@ mod tests {
     use serio::channel::MemoryDuplex;
     use tracing::{field::debug, subscriber::DefaultGuard, Level};
     use tracing_subscriber::fmt::format::FmtSpan;
-
-    static LOGGING: Once = Once::new();
 
     fn reference_impl(
         key: &[u8],
@@ -464,6 +460,7 @@ mod tests {
         let subscriber = tracing_subscriber::fmt()
             .with_span_events(FmtSpan::FULL)
             .with_thread_ids(true)
+            .with_thread_names(true)
             .with_max_level(Level::TRACE)
             .finish();
         tracing::subscriber::set_default(subscriber)
@@ -476,14 +473,6 @@ mod tests {
         MpcAesGcm<STExecutor<MemoryDuplex>>,
         MpcAesGcm<STExecutor<MemoryDuplex>>,
     ) {
-        LOGGING.call_once(|| {
-            let subscriber = tracing_subscriber::fmt()
-                .with_span_events(FmtSpan::FULL)
-                .with_thread_ids(true)
-                .with_max_level(Level::TRACE)
-                .finish();
-            tracing::subscriber::set_global_default(subscriber).unwrap();
-        });
         debug("Starting setup pair.");
         debug("Setting up logging.");
 
@@ -546,6 +535,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_encrypt_private() {
+        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -570,6 +560,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_encrypt_public() {
+        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -594,6 +585,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_private() {
+        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -615,6 +607,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_private_bad_tag() {
+        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -652,6 +645,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_public() {
+        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -674,6 +668,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_public_bad_tag() {
+        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
@@ -711,6 +706,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_verify_tag() {
+        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
