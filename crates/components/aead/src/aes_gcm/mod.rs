@@ -423,6 +423,8 @@ impl<Ctx: Context> Aead for MpcAesGcm<Ctx> {
 
 #[cfg(test)]
 mod tests {
+    use std::time::Duration;
+
     use super::*;
 
     use crate::{
@@ -434,6 +436,7 @@ mod tests {
     use mpz_common::executor::STExecutor;
     use mpz_garble::{protocol::deap::mock::create_mock_deap_vm, Memory};
     use serio::channel::MemoryDuplex;
+    use tokio::{runtime::Handle, task::JoinHandle, time::timeout};
 
     fn reference_impl(
         key: &[u8],
@@ -452,6 +455,20 @@ mod tests {
             .unwrap();
 
         ciphertext
+    }
+
+    async fn tokio_task_dump() -> JoinHandle<()> {
+        tokio::spawn(async {
+            tokio::time::sleep(Duration::from_secs(65)).await;
+            let handle = Handle::current();
+            if let Ok(dump) = timeout(Duration::from_secs(2), handle.dump()).await {
+                for (i, task) in dump.tasks().iter().enumerate() {
+                    let trace = task.trace();
+                    println!("TASK {i}:");
+                    println!("{trace}\n");
+                }
+            }
+        })
     }
 
     async fn setup_pair(
@@ -565,6 +582,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_private() {
+        let handle = tokio_task_dump();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];
