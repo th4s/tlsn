@@ -108,6 +108,7 @@ pub(crate) async fn verify_tag<
     aad: Vec<u8>,
     purported_tag: [u8; TAG_LEN],
 ) -> Result<(), AesGcmError> {
+    println!("Inside verify_tag");
     let tag_share = compute_tag_share(aes_ctr, hasher, explicit_nonce, ciphertext, aad).await?;
 
     let io = ctx.io_mut();
@@ -123,6 +124,7 @@ pub(crate) async fn verify_tag<
             // Send decommitment (tag share) to follower.
             io.send(tag_share_decommitment).await?;
 
+            println!("Finished verify_tag leader");
             tag_share + follower_tag_share
         }
         Role::Follower => {
@@ -142,6 +144,7 @@ pub(crate) async fn verify_tag<
 
             let leader_tag_share = decommitment.into_inner();
 
+            println!("Finished verify_tag follower");
             tag_share + leader_tag_share
         }
     };
