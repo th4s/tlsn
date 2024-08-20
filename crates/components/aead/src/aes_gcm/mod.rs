@@ -475,6 +475,7 @@ mod tests {
     ) {
         debug!("Starting setup pair.");
         let (leader_vm, follower_vm) = create_mock_deap_vm();
+        debug!("Created mock deap vm.");
 
         let leader_key = leader_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -485,6 +486,7 @@ mod tests {
 
         leader_vm.assign(&leader_key, key.clone()).unwrap();
         leader_vm.assign(&leader_iv, iv.clone()).unwrap();
+        debug!("Set leader key and iv.");
 
         let follower_key = follower_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -495,6 +497,7 @@ mod tests {
 
         follower_vm.assign(&follower_key, key.clone()).unwrap();
         follower_vm.assign(&follower_iv, iv.clone()).unwrap();
+        debug!("Set follower key and iv.");
 
         let leader_config = AesGcmConfigBuilder::default()
             .id("test".to_string())
