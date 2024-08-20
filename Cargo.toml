@@ -31,7 +31,6 @@ resolver = "2"
 
 [profile.tests-integration]
 inherits = "release"
-split-debuginfo = "off"
 opt-level = 1
 
 [workspace.dependencies]

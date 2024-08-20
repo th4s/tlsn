@@ -34,4 +34,4 @@ jobs:
         run: echo "127.0.0.1 tlsnotaryserver.io" | sudo tee -a /etc/hosts
 
       - name: Run integration tests
-        run: RUSTFLAGS="--cfg tokio_unstable --cfg tokio_taskdump" cargo test --profile tests-integration --workspace --exclude tlsn-tls-client --exclude tlsn-tls-core -- --include-ignored --nocapture
+        run: cargo test --profile tests-integration --workspace --exclude tlsn-tls-client --exclude tlsn-tls-core -- --include-ignored
