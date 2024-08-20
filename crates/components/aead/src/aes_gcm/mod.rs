@@ -460,6 +460,7 @@ mod tests {
         let subscriber = tracing_subscriber::fmt()
             .with_span_events(FmtSpan::FULL)
             .with_thread_ids(true)
+            .with_thread_names(true)
             .with_max_level(Level::TRACE)
             .finish();
         tracing::subscriber::set_default(subscriber)
