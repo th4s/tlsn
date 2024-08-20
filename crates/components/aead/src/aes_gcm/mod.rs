@@ -457,7 +457,7 @@ mod tests {
         ciphertext
     }
 
-    async fn tokio_task_dump() -> JoinHandle<()> {
+    fn tokio_task_dump() -> JoinHandle<()> {
         tokio::spawn(async {
             tokio::time::sleep(Duration::from_secs(65)).await;
             let handle = Handle::current();
