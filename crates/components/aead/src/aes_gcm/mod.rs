@@ -462,6 +462,7 @@ mod tests {
             .with_thread_ids(true)
             .with_thread_names(true)
             .with_max_level(Level::TRACE)
+            .with_test_writer()
             .finish();
         tracing::subscriber::set_default(subscriber)
     }
