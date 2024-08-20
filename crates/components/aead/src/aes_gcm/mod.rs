@@ -459,19 +459,22 @@ mod tests {
 
     fn tokio_task_dump() -> JoinHandle<()> {
         tokio::spawn(async {
-            tokio::time::sleep(Duration::from_secs(65)).await;
+            let mut interval = tokio::time::interval(Duration::from_millis(3000));
             let handle = Handle::current();
-            match timeout(Duration::from_secs(10), handle.dump()).await {
-                Ok(dump) => {
-                    for (i, task) in dump.tasks().iter().enumerate() {
-                        let trace = task.trace();
-                        println!("TASK {i}:");
-                        println!("{trace}\n");
+            loop {
+                interval.tick().await;
+                match timeout(Duration::from_secs(2), handle.dump()).await {
+                    Ok(dump) => {
+                        for (i, task) in dump.tasks().iter().enumerate() {
+                            let trace = task.trace();
+                            println!("TASK {i}:");
+                            println!("{trace}\n");
+                        }
                     }
-                }
-                Err(err) => {
-                    println!("Unable to get task dumps!");
-                    eprintln!("{err}");
+                    Err(err) => {
+                        println!("Unable to get task dumps!");
+                        eprintln!("{err}");
+                    }
                 }
             }
         })
