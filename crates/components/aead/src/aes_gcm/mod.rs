@@ -476,7 +476,7 @@ mod tests {
 
         leader_vm.assign(&leader_key, key.clone()).unwrap();
         leader_vm.assign(&leader_iv, iv.clone()).unwrap();
-        println!("Set leader key and iv.");
+        //println!("Set leader key and iv.");
 
         let follower_key = follower_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -487,7 +487,7 @@ mod tests {
 
         follower_vm.assign(&follower_key, key.clone()).unwrap();
         follower_vm.assign(&follower_iv, iv.clone()).unwrap();
-        println!("Set follower key and iv.");
+        //println!("Set follower key and iv.");
 
         let leader_config = AesGcmConfigBuilder::default()
             .id("test".to_string())
@@ -507,18 +507,18 @@ mod tests {
             follower_config,
         )
         .await;
-        println!("setting keys");
+        //println!("setting keys");
 
         futures::try_join!(
             leader.set_key(leader_key, leader_iv),
             follower.set_key(follower_key, follower_iv)
         )
         .unwrap();
-        println!("setting up....");
+        //println!("setting up....");
 
         futures::try_join!(leader.setup(), follower.setup()).unwrap();
         futures::try_join!(leader.start(), follower.start()).unwrap();
-        println!("setup pair finished");
+        //println!("setup pair finished");
 
         (leader, follower)
     }
