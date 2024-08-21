@@ -118,7 +118,6 @@ where
         len: usize,
         mode: ExecutionMode,
     ) -> Result<ValueRef, StreamCipherError> {
-        println!("Inside compute_keystream");
         let EncodedKeyAndIv { key, iv } = self
             .state
             .encoded_key_iv
@@ -141,7 +140,6 @@ where
 
         self.state.counter += 1;
 
-        println!("Finished compute_keystream");
         Ok(keystream)
     }
 
