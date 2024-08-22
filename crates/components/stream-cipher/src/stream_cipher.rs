@@ -642,6 +642,7 @@ where
         explicit_nonce: Vec<u8>,
         ctr: usize,
     ) -> Result<Vec<u8>, StreamCipherError> {
+        println!("Inside share_keystream_block");
         let EncodedKeyAndIv { key, iv } = self
             .state
             .encoded_key_iv
@@ -668,6 +669,7 @@ where
             .try_into()
             .expect("key block is array");
 
+        println!("Finished share_keystream_block");
         Ok(share)
     }
 }

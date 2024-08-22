@@ -40,6 +40,7 @@ async fn compute_tag_share<C: StreamCipher<Aes128Ctr> + ?Sized, H: UniversalHash
     ciphertext: Vec<u8>,
     aad: Vec<u8>,
 ) -> Result<TagShare, AesGcmError> {
+    println!("Inside compute_tag_share");
     let j0 = aes_ctr
         .share_keystream_block(explicit_nonce, 1)
         .map_err(AesGcmError::from)
@@ -54,6 +55,7 @@ async fn compute_tag_share<C: StreamCipher<Aes128Ctr> + ?Sized, H: UniversalHash
 
     let tag_share = core::array::from_fn(|i| j0[i] ^ hash[i]);
 
+    println!("Finished compute_tag_share");
     Ok(TagShare(tag_share))
 }
 
