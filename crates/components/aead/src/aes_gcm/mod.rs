@@ -434,6 +434,8 @@ mod tests {
     use mpz_common::executor::STExecutor;
     use mpz_garble::{protocol::deap::mock::create_mock_deap_vm, Memory};
     use serio::channel::MemoryDuplex;
+    use tracing::{debug, subscriber::DefaultGuard, Level};
+    use tracing_subscriber::fmt::format::FmtSpan;
 
     fn reference_impl(
         key: &[u8],
@@ -454,6 +456,17 @@ mod tests {
         ciphertext
     }
 
+    fn setup_tracing() -> DefaultGuard {
+        let subscriber = tracing_subscriber::fmt()
+            .with_span_events(FmtSpan::FULL)
+            .with_thread_ids(true)
+            .with_thread_names(true)
+            .with_max_level(Level::TRACE)
+            .with_test_writer()
+            .finish();
+        tracing::subscriber::set_default(subscriber)
+    }
+
     async fn setup_pair(
         key: Vec<u8>,
         iv: Vec<u8>,
@@ -461,7 +474,9 @@ mod tests {
         MpcAesGcm<STExecutor<MemoryDuplex>>,
         MpcAesGcm<STExecutor<MemoryDuplex>>,
     ) {
+        debug!("Starting setup pair.");
         let (leader_vm, follower_vm) = create_mock_deap_vm();
+        debug!("Created mock deap vm.");
 
         let leader_key = leader_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -472,6 +487,7 @@ mod tests {
 
         leader_vm.assign(&leader_key, key.clone()).unwrap();
         leader_vm.assign(&leader_iv, iv.clone()).unwrap();
+        debug!("Set leader key and iv.");
 
         let follower_key = follower_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -482,6 +498,7 @@ mod tests {
 
         follower_vm.assign(&follower_key, key.clone()).unwrap();
         follower_vm.assign(&follower_iv, iv.clone()).unwrap();
+        debug!("Set follower key and iv.");
 
         let leader_config = AesGcmConfigBuilder::default()
             .id("test".to_string())
@@ -501,15 +518,18 @@ mod tests {
             follower_config,
         )
         .await;
+        debug!("setting keys");
 
         futures::try_join!(
             leader.set_key(leader_key, leader_iv),
             follower.set_key(follower_key, follower_iv)
         )
         .unwrap();
+        debug!("setting up....");
 
         futures::try_join!(leader.setup(), follower.setup()).unwrap();
         futures::try_join!(leader.start(), follower.start()).unwrap();
+        debug!("setup pair finished");
 
         (leader, follower)
     }
@@ -565,6 +585,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "expensive"]
     async fn test_aes_gcm_decrypt_private() {
+        let _guard = setup_tracing();
         let key = vec![0u8; 16];
         let iv = vec![0u8; 4];
         let explicit_nonce = vec![0u8; 8];

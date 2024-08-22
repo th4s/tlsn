@@ -20,12 +20,10 @@ tlsn-block-cipher = { workspace = true }
 tlsn-stream-cipher = { workspace = true }
 tlsn-universal-hash = { workspace = true }
 
-mpz-common = { git = "https://github.com/privacy-scaling-explorations/mpz", rev = "b8ae7ac" }
-mpz-core = { git = "https://github.com/privacy-scaling-explorations/mpz", rev = "b8ae7ac" }
-mpz-garble = { git = "https://github.com/privacy-scaling-explorations/mpz", rev = "b8ae7ac" }
-mpz-ot = { git = "https://github.com/privacy-scaling-explorations/mpz", rev = "b8ae7ac", optional = true, features = [
-    "ideal",
-] }
+mpz-common.workspace = true
+mpz-core.workspace = true
+mpz-garble.workspace = true
+mpz-ot = { workspace = true, optional = true, features = ["ideal"] }
 
 serio = { workspace = true }
 
@@ -39,3 +37,4 @@ tracing = { workspace = true }
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
 aes-gcm = { workspace = true }
+tracing-subscriber.workspace = true
