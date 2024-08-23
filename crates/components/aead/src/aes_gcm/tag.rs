@@ -40,7 +40,10 @@ async fn compute_tag_share<C: StreamCipher<Aes128Ctr> + ?Sized, H: UniversalHash
     ciphertext: Vec<u8>,
     aad: Vec<u8>,
 ) -> Result<TagShare, AesGcmError> {
-    println!("Inside compute_tag_share");
+    println!(
+        "THREAD: {:?}, Inside compute_tag_share",
+        thread::current().id()
+    );
     let j0 = aes_ctr
         .share_keystream_block(explicit_nonce, 1)
         .map_err(AesGcmError::from)
@@ -55,7 +58,10 @@ async fn compute_tag_share<C: StreamCipher<Aes128Ctr> + ?Sized, H: UniversalHash
 
     let tag_share = core::array::from_fn(|i| j0[i] ^ hash[i]);
 
-    println!("Finished compute_tag_share");
+    println!(
+        "THREAD: {:?}, Finished compute_tag_share",
+        thread::current().id()
+    );
     Ok(TagShare(tag_share))
 }
 
@@ -110,7 +116,7 @@ pub(crate) async fn verify_tag<
     aad: Vec<u8>,
     purported_tag: [u8; TAG_LEN],
 ) -> Result<(), AesGcmError> {
-    println!("Inside verify_tag");
+    println!("THREAD: {:?}, Inside verify_tag", thread::current().id());
     let tag_share = compute_tag_share(aes_ctr, hasher, explicit_nonce, ciphertext, aad).await?;
 
     let io = ctx.io_mut();
@@ -126,7 +132,10 @@ pub(crate) async fn verify_tag<
             // Send decommitment (tag share) to follower.
             io.send(tag_share_decommitment).await?;
 
-            println!("Finished verify_tag leader");
+            println!(
+                "THREAD: {:?}, Finished verify_tag leader",
+                thread::current().id()
+            );
             tag_share + follower_tag_share
         }
         Role::Follower => {
@@ -146,7 +155,10 @@ pub(crate) async fn verify_tag<
 
             let leader_tag_share = decommitment.into_inner();
 
-            println!("Finished verify_tag follower");
+            println!(
+                "THREAD: {:?}, Finished verify_tag follower",
+                thread::current().id()
+            );
             tag_share + leader_tag_share
         }
     };

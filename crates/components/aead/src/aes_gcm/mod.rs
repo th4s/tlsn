@@ -245,7 +245,6 @@ impl<Ctx: Context> Aead for MpcAesGcm<Ctx> {
         mut payload: Vec<u8>,
         aad: Vec<u8>,
     ) -> Result<Vec<u8>, AesGcmError> {
-        println!("Inside decrypt_private");
         let purported_tag: [u8; TAG_LEN] = payload
             .split_off(payload.len() - TAG_LEN)
             .try_into()
@@ -269,7 +268,6 @@ impl<Ctx: Context> Aead for MpcAesGcm<Ctx> {
             .decrypt_private(explicit_nonce, ciphertext)
             .await?;
 
-        println!("Finished decrypt_private");
         Ok(plaintext)
     }
 
@@ -425,6 +423,8 @@ impl<Ctx: Context> Aead for MpcAesGcm<Ctx> {
 
 #[cfg(test)]
 mod tests {
+    use std::thread;
+
     use super::*;
 
     use crate::{
@@ -463,9 +463,12 @@ mod tests {
         MpcAesGcm<STExecutor<MemoryDuplex>>,
         MpcAesGcm<STExecutor<MemoryDuplex>>,
     ) {
-        println!("Starting setup pair.");
+        println!("THREAD: {:?}, Starting setup pair.", thread::current().id());
         let (leader_vm, follower_vm) = create_mock_deap_vm();
-        println!("Created mock deap vm.");
+        println!(
+            "THREAD: {:?}, Created mock deap vm.",
+            thread::current().id()
+        );
 
         let leader_key = leader_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -476,7 +479,10 @@ mod tests {
 
         leader_vm.assign(&leader_key, key.clone()).unwrap();
         leader_vm.assign(&leader_iv, iv.clone()).unwrap();
-        println!("Set leader key and iv.");
+        println!(
+            "THREAD: {:?}, Set leader key and iv.",
+            thread::current().id()
+        );
 
         let follower_key = follower_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -487,7 +493,10 @@ mod tests {
 
         follower_vm.assign(&follower_key, key.clone()).unwrap();
         follower_vm.assign(&follower_iv, iv.clone()).unwrap();
-        println!("Set follower key and iv.");
+        println!(
+            "THREAD: {:?}, Set follower key and iv.",
+            thread::current().id()
+        );
 
         let leader_config = AesGcmConfigBuilder::default()
             .id("test".to_string())
@@ -507,18 +516,18 @@ mod tests {
             follower_config,
         )
         .await;
-        println!("setting keys");
+        println!("THREAD: {:?}, setting keys", thread::current().id());
 
         futures::try_join!(
             leader.set_key(leader_key, leader_iv),
             follower.set_key(follower_key, follower_iv)
         )
         .unwrap();
-        println!("setting up....");
+        println!("THREAD: {:?}, setting up....", thread::current().id());
 
         futures::try_join!(leader.setup(), follower.setup()).unwrap();
         futures::try_join!(leader.start(), follower.start()).unwrap();
-        println!("setup pair finished");
+        println!("THREAD: {:?}, setup pair finished", thread::current().id());
 
         (leader, follower)
     }
