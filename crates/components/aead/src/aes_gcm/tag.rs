@@ -6,7 +6,7 @@ use mpz_core::{
 };
 use serde::{Deserialize, Serialize};
 use serio::{stream::IoStreamExt, SinkExt};
-use std::ops::Add;
+use std::{ops::Add, thread};
 use tlsn_stream_cipher::{Aes128Ctr, StreamCipher};
 use tlsn_universal_hash::UniversalHash;
 use tracing::instrument;

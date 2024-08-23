@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use mpz_circuits::types::Value;
-use std::collections::HashMap;
+use std::{collections::HashMap, thread};
 use tracing::instrument;
 
 use mpz_garble::{value::ValueRef, Decode, DecodePrivate, Execute, Load, Prove, Thread, Verify};

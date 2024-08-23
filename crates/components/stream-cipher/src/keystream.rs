@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, marker::PhantomData};
+use std::{collections::VecDeque, marker::PhantomData, thread};
 
 use mpz_garble::{value::ValueRef, Execute, Load, Memory, Prove, Thread, Verify};
 use tracing::instrument;
