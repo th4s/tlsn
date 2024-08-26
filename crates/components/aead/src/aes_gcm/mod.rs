@@ -463,6 +463,10 @@ mod tests {
         MpcAesGcm<STExecutor<MemoryDuplex>>,
         MpcAesGcm<STExecutor<MemoryDuplex>>,
     ) {
+        println!(
+            "Available parallelism: {:?}",
+            thread::available_parallelism(),
+        );
         println!("THREAD: {:?}, Starting setup pair.", thread::current().id());
         let (leader_vm, follower_vm) = create_mock_deap_vm();
         println!(
