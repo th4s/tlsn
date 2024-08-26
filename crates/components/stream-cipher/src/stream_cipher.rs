@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use mpz_circuits::types::Value;
-use std::collections::HashMap;
+use std::{collections::HashMap, thread};
 use tracing::instrument;
 
 use mpz_garble::{value::ValueRef, Decode, DecodePrivate, Execute, Load, Prove, Thread, Verify};
@@ -118,6 +118,7 @@ where
         len: usize,
         mode: ExecutionMode,
     ) -> Result<ValueRef, StreamCipherError> {
+        println!("Inside compute_keystream");
         let EncodedKeyAndIv { key, iv } = self
             .state
             .encoded_key_iv
@@ -140,6 +141,7 @@ where
 
         self.state.counter += 1;
 
+        println!("Finished compute_keystream");
         Ok(keystream)
     }
 
@@ -640,6 +642,10 @@ where
         explicit_nonce: Vec<u8>,
         ctr: usize,
     ) -> Result<Vec<u8>, StreamCipherError> {
+        println!(
+            "THREAD: {:?}, Inside share_keystream_block",
+            thread::current().id()
+        );
         let EncodedKeyAndIv { key, iv } = self
             .state
             .encoded_key_iv
@@ -666,6 +672,10 @@ where
             .try_into()
             .expect("key block is array");
 
+        println!(
+            "THREAD: {:?}, Finished share_keystream_block",
+            thread::current().id()
+        );
         Ok(share)
     }
 }

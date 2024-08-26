@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, marker::PhantomData};
+use std::{collections::VecDeque, marker::PhantomData, thread};
 
 use mpz_garble::{value::ValueRef, Execute, Load, Memory, Prove, Thread, Verify};
 use tracing::instrument;
@@ -146,6 +146,7 @@ impl<C: CtrCircuit> KeyStream<C> {
     where
         T: Thread + Memory + Execute + Prove + Verify + Send + 'static,
     {
+        println!("THREAD: {:?}, Inside compute", thread::current().id());
         let block_count = (len / C::BLOCK_LEN) + (len % C::BLOCK_LEN != 0) as usize;
         let explicit_nonce_len = explicit_nonce.len();
         let explicit_nonce: C::NONCE = explicit_nonce
@@ -210,6 +211,7 @@ impl<C: CtrCircuit> KeyStream<C> {
 
         let keystream = thread.array_from_values(&vars.flatten(len))?;
 
+        println!("THREAD: {:?}, Finished compute", thread::current().id());
         Ok(keystream)
     }
 }

@@ -423,6 +423,8 @@ impl<Ctx: Context> Aead for MpcAesGcm<Ctx> {
 
 #[cfg(test)]
 mod tests {
+    use std::thread;
+
     use super::*;
 
     use crate::{
@@ -461,7 +463,16 @@ mod tests {
         MpcAesGcm<STExecutor<MemoryDuplex>>,
         MpcAesGcm<STExecutor<MemoryDuplex>>,
     ) {
+        println!(
+            "Available parallelism: {:?}",
+            thread::available_parallelism(),
+        );
+        println!("THREAD: {:?}, Starting setup pair.", thread::current().id());
         let (leader_vm, follower_vm) = create_mock_deap_vm();
+        println!(
+            "THREAD: {:?}, Created mock deap vm.",
+            thread::current().id()
+        );
 
         let leader_key = leader_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -472,6 +483,10 @@ mod tests {
 
         leader_vm.assign(&leader_key, key.clone()).unwrap();
         leader_vm.assign(&leader_iv, iv.clone()).unwrap();
+        println!(
+            "THREAD: {:?}, Set leader key and iv.",
+            thread::current().id()
+        );
 
         let follower_key = follower_vm
             .new_public_array_input::<u8>("key", key.len())
@@ -482,6 +497,10 @@ mod tests {
 
         follower_vm.assign(&follower_key, key.clone()).unwrap();
         follower_vm.assign(&follower_iv, iv.clone()).unwrap();
+        println!(
+            "THREAD: {:?}, Set follower key and iv.",
+            thread::current().id()
+        );
 
         let leader_config = AesGcmConfigBuilder::default()
             .id("test".to_string())
@@ -501,15 +520,18 @@ mod tests {
             follower_config,
         )
         .await;
+        println!("THREAD: {:?}, setting keys", thread::current().id());
 
         futures::try_join!(
             leader.set_key(leader_key, leader_iv),
             follower.set_key(follower_key, follower_iv)
         )
         .unwrap();
+        println!("THREAD: {:?}, setting up....", thread::current().id());
 
         futures::try_join!(leader.setup(), follower.setup()).unwrap();
         futures::try_join!(leader.start(), follower.start()).unwrap();
+        println!("THREAD: {:?}, setup pair finished", thread::current().id());
 
         (leader, follower)
     }
